@@ -46,7 +46,8 @@ public class QuestRender : MonoBehaviour {
 
 
 	// Used to display an entire quest
-	public void DisplayQuest(Action root) {
+	public void DisplayQuest(Quest quest) {
+		Action root = quest.root;
 		GameObject nodeVisual = Instantiate (nodeGraphic, transform.position, Quaternion.identity);
 		nodeVisual.transform.SetParent (this.transform);
 		nodeVisual.transform.position = new Vector3 (Camera.main.pixelWidth / 2, Camera.main.pixelHeight - 50, 0);

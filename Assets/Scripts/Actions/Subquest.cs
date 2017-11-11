@@ -13,4 +13,8 @@ public class Subquest : Action {
 		actionText = "Subquest";
 		this.subActions = new List<Action>();
 	}
+
+	public override void Initialize() {
+
+	}
 }

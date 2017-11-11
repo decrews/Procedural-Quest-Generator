@@ -18,7 +18,5 @@ public abstract class Action {
 		return subActions;
 	}
 
-	public void SetSubactions(List<Action> sub) {
-		this.subActions = sub;
-	}
+	public abstract void Initialize ();
 }
