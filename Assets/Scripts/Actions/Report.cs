@@ -4,18 +4,19 @@ using UnityEngine;
 
 public class Report : Action {
 	
-	public Report(List<Action> subActions) {
-		this.subActions = subActions;
-	}
-
 	public Report() {
 		this.subActions = new List<Action>();
+		Initialize ();
 	}
 
 	public override void Initialize() {
-		List<Action> subRules1 = new List<Action> { new Goto () };
+		List<List<string>> patterns = new List<List<string>> ();
+		patterns.Add(new List<string> { "goto" });
 
-		List<List<Action>> rules = new List<List<Action>> { subRules1 };
-		this.subActions = rules [Random.Range (0, rules.Count)];
+		foreach (string act in patterns [Random.Range (0, patterns.Count)]) {
+			if (act == "goto") {
+				subActions.Add (new Goto ());
+			}
+		}
 	}
 }

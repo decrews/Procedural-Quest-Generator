@@ -18,5 +18,12 @@ public abstract class Action {
 		return subActions;
 	}
 
+	// Used to initialize a set of actions without parameters
+	public void GenerateSubactions() {
+		foreach (Action act in subActions) {
+			act.Initialize ();
+		}
+	}
+
 	public abstract void Initialize ();
 }

@@ -7,71 +7,63 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class QuestGenerator : MonoBehaviour {
+public class QuestGenerator {
 
-	// Quest seeds
-	List<List<Action>> quests;
+	List<List<string>> questTemplates;
 
-	void Start () {
-		// Quest where the player must get an item, go to someone, and use it on them
-		List<Action> quest1 = new List<Action> { new Get(), new Goto(), new Use() };
+	private static QuestGenerator instance;
 
-		// Quest where the player needs to go to an NPC, steal something, and then report in.
-		List<Action> quest2 = new List<Action> { new Goto(), new Steal(), new Report() };
+	public static QuestGenerator Instance() {
+		if (instance == null) {
+			instance = new QuestGenerator ();
+		}
 
-		// Put quests into a list that can be randomly selected from
-		quests = new List<List<Action>> { quest1, quest2 };
+		return instance;
+	}
 
-		Quest blah = GetQuest();
+	private QuestGenerator() {
+		// Templates for each roots of the quest chain.
+		List<string> quest1 = new List<string> { "get", "goto", "use" };
+		List<string> quest2 = new List<string> { "goto", "steal", "report" };
+		List<string> quest3 = new List<string> { "learn", "steal", "report" };
 
-		// Render the quest nodes to the UI
-		QuestRender qr = GetComponent<QuestRender> ();
-		qr.DisplayQuest (blah);
-
+		// Put templates into a list that can be randomly selected from
+		questTemplates = new List<List<string>> { quest1, quest2, quest3 };
 	}
 
 
-	// Generates and returns a quest
-	Quest GetQuest() {
-		// Here I will gather game state information and workout what 
-		// npcs and items make sense to build a quest around
+	public Quest GetQuest() {
+		// Gather data about the game state
 
-		// Get a random subquest seed
-		Subquest root = new Subquest(quests[Random.Range(0, quests.Count)]);
+		List<Action> rootQuests = new List<Action> ();
+		List<string> selectedTemplate = questTemplates [Random.Range (0, questTemplates.Count)];
+
+		foreach (string act in selectedTemplate) {
+			if (act == "get") {
+				rootQuests.Add (new Get ());
+			} else if (act == "goto") {
+				rootQuests.Add (new Goto ());
+			} else if (act == "use") {
+				rootQuests.Add (new Use ());
+			} else if (act == "steal") {
+				rootQuests.Add (new Steal ());
+			} else if (act == "learn") {
+				rootQuests.Add (new Learn ());
+			} else if (act == "report") {
+				rootQuests.Add (new Report ());
+			}
+		}
+			
+		Subquest root = new Subquest(rootQuests);
 		Quest quest = new Quest (root);
-		AddActions (quest.root);
+
 		return quest;
 	}
-		
 
-	// Sets the subactions for a node from their respective list based on type
-	void AddActions(Action root) {
-		for (var i = 0; i < root.GetSubactions().Count; i++) {
-			root.GetSubactions () [i].Initialize ();
-			/*
-			if (root.GetSubactions()[i].GetType() == typeof(Kill)) {
-				root.GetSubactions()[i] = killRules[Random.Range(0, killRules.Count)];
-			} else if (root.GetSubactions()[i].GetType() == typeof(Goto)) {
-				root.GetSubactions()[i] = gotoRules[Random.Range(0, gotoRules.Count)];
-			} else if (root.GetSubactions()[i].GetType() == typeof(Learn)) {
-				root.GetSubactions()[i] = learnRules[Random.Range(0, learnRules.Count)];
-			} else if (root.GetSubactions()[i].GetType() == typeof(Get)) {
-				root.GetSubactions()[i] = getRules[Random.Range(0, getRules.Count)];
-			} else if (root.GetSubactions()[i].GetType() == typeof(Gather)) {
-				root.GetSubactions()[i] = gatherRules[Random.Range(0, gatherRules.Count)];
-			} else if (root.GetSubactions()[i].GetType() == typeof(Report)) {
-				root.GetSubactions()[i] = reportRules[Random.Range(0, reportRules.Count)];
-			} else if (root.GetSubactions()[i].GetType() == typeof(Loot)) {
-				root.GetSubactions()[i] = lootRules[Random.Range(0, lootRules.Count)];
-			} else if (root.GetSubactions()[i].GetType() == typeof(Use)) {
-				root.GetSubactions()[i] = useRules[Random.Range(0, useRules.Count)];
-			} else if (root.GetSubactions()[i].GetType() == typeof(Steal)) {
-				root.GetSubactions()[i] = stealRules[Random.Range(0, stealRules.Count)];
-			} else if (root.GetSubactions()[i].GetType() == typeof(Listen)) {
-				root.GetSubactions()[i] = listenRules[Random.Range(0, listenRules.Count)];
-			}
-			*/
-			AddActions (root.GetSubactions()[i]);
-		}
+	/*
+	public Subquest GetSubquest() {
+		Subquest sub = new Subquest(quests[Random.Range(0, quests.Count)]);
+		return sub;
 	}
+	*/	
 }

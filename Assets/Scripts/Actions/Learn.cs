@@ -4,19 +4,28 @@ using UnityEngine;
 
 public class Learn : Action {
 
-	public Learn(List<Action> subActions) {
-		this.subActions = subActions;
-	}
-
 	public Learn() {
 		this.subActions = new List<Action>();
+		Initialize ();
 	}
 
 	public override void Initialize() {
-		List<Action> subRules1 = new List<Action> { new Kill (), new Loot (), new Use () };
-		List<Action> subRules2 = new List<Action> { new Goto (), new Listen () };
+		List<List<string>> patterns = new List<List<string>> ();
+		patterns.Add(new List<string> { "kill", "loot", "use" });
+		patterns.Add(new List<string> { "goto", "listen" });
 
-		List<List<Action>> rules = new List<List<Action>> { subRules1, subRules2 };
-		this.subActions = rules [Random.Range (0, rules.Count)];
+		foreach (string act in patterns [Random.Range (0, patterns.Count)]) {
+			if (act == "kill") {
+				subActions.Add (new Kill ());
+			} else if (act == "loot") {
+				subActions.Add (new Loot ());
+			} else if (act == "listen") {
+				subActions.Add (new Listen ());
+			} else if (act == "goto") {
+				subActions.Add (new Goto ());
+			} else if (act == "use") {
+				subActions.Add (new Use ());
+			}
+		}
 	}
 }

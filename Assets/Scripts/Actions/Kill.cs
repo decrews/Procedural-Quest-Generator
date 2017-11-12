@@ -4,19 +4,22 @@ using UnityEngine;
 
 public class Kill : Action {
 
-	public Kill(List<Action> subActions) {
-		this.subActions = subActions;
-	}
-
 	public Kill() {
 		this.subActions = new List<Action>();
+		Initialize ();
 	}
 
 	public override void Initialize() {
-		List<Action> subRules1 = new List<Action> { new Goto () };
-		List<Action> subRules2 = new List<Action> { new Goto (), new Listen ()};
+		List<List<string>> patterns = new List<List<string>> ();
+		patterns.Add(new List<string> { "goto" });
+		patterns.Add(new List<string> { "goto", "listen" });
 
-		List<List<Action>> rules = new List<List<Action>> { subRules2, subRules1 };
-		this.subActions = rules [Random.Range (0, rules.Count)];
+		foreach (string act in patterns [Random.Range (0, patterns.Count)]) {
+			if (act == "listen") {
+				subActions.Add (new Listen ());
+			} else if (act == "goto") {
+				subActions.Add (new Goto ());
+			}
+		}
 	}
 }
