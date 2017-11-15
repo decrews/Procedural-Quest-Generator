@@ -8,7 +8,8 @@ using UnityEngine;
 
 public abstract class Action {
 	public List<Action> subActions;
-	protected string actionText = "Text";
+	public string actionText = "Text";
+	public bool completed = false;
 
 	public string GetText() {
 		return actionText;
@@ -17,13 +18,4 @@ public abstract class Action {
 	public List<Action> GetSubactions() {
 		return subActions;
 	}
-
-	// Used to initialize a set of actions without parameters
-	public void GenerateSubactions() {
-		foreach (Action act in subActions) {
-			act.Initialize ();
-		}
-	}
-
-	public abstract void Initialize ();
 }

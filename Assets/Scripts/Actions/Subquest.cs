@@ -5,16 +5,16 @@ using UnityEngine;
 public class Subquest : Action {
 
 	public Subquest(List<Action> subActions) {
-		actionText = "Subquest";
+		actionText = "Subquest Complete";
 		this.subActions = subActions;
 	}
 
 	public Subquest() {
-		actionText = "Subquest";
+		actionText = "Subquest Complete";
 		this.subActions = new List<Action>();
 	}
 
-	public override void Initialize() {
+	public void Initialize() {
 
 	}
 }

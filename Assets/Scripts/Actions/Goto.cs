@@ -4,12 +4,13 @@ using UnityEngine;
 
 public class Goto : Action {
 	
-	public Goto() {
+	public Goto(string location) {
+		this.actionText = "Go to " + location;
 		this.subActions = new List<Action>();
 		Initialize ();
 	}
 
-	public override void Initialize() {
+	public void Initialize() {
 		
 	}
 }

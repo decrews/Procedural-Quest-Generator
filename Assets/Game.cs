@@ -13,10 +13,9 @@ public class Game : MonoBehaviour {
 		// Render the quest nodes to the UI
 		QuestRender qr = GetComponent<QuestRender> ();
 		qr.DisplayQuest (blah);
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
+
+		// Read the quest and display the step
+		QuestReader qReader = GetComponent<QuestReader> ();
+		qReader.ReadQuest (blah);
 	}
 }

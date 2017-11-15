@@ -4,12 +4,13 @@ using UnityEngine;
 
 public class Loot : Action {
 	
-	public Loot() {
+	public Loot(string item) {
+		actionText = "Loot " + item;
 		this.subActions = new List<Action>();
 		Initialize ();
 	}
 
-	public override void Initialize() {
+	public void Initialize() {
 		
 	}
 }

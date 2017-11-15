@@ -4,12 +4,13 @@ using UnityEngine;
 
 public class Gather : Action {
 
-	public Gather() {
+	public Gather(string item) {
+		this.actionText = "Gather " + item;
 		this.subActions = new List<Action>();
 		Initialize ();
 	}
 
-	public override void Initialize() {
+	public void Initialize() {
 		
 	}
 }

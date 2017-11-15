@@ -14,7 +14,6 @@ public class QuestRender : MonoBehaviour {
 
 	// Recursively displays all children
 	void DisplayChildren (Action root, Vector3 pos, float depth) {
-		Debug.Log (root.GetType ());
 
 		// child count
 		float cc = root.GetSubactions ().Count;
@@ -28,8 +27,8 @@ public class QuestRender : MonoBehaviour {
 			nodeVisual.transform.SetParent (this.transform);
 
 			// Set the position of the node based on it's parent position and the depth of the tree
-			nodeVisual.transform.position = new Vector3 (pos.x + (i - (cc-1f)*0.5f) * (150/(depth)), 
-				pos.y - (100f/depth), 
+			nodeVisual.transform.position = new Vector3 (pos.x + (i - (cc-1f)*0.5f) * (300/(depth)), 
+				pos.y - (300f/depth), 
 				pos.z);
 
 			// Reduce the size of the nodes each level by dividing by tree depth
@@ -37,7 +36,7 @@ public class QuestRender : MonoBehaviour {
 				nodeVisual.transform.localScale.y / (depth), nodeVisual.transform.localScale.z);
 
 			// Set the text 
-			nodeVisual.GetComponentInChildren<Text> ().text = child.ToString();
+			nodeVisual.GetComponentInChildren<Text> ().text = child.actionText;
 
 			// Display the children of each child until the leaves are reached
 			DisplayChildren (child, nodeVisual.transform.position, depth+0.7f);
@@ -50,7 +49,7 @@ public class QuestRender : MonoBehaviour {
 		Action root = quest.root;
 		GameObject nodeVisual = Instantiate (nodeGraphic, transform.position, Quaternion.identity);
 		nodeVisual.transform.SetParent (this.transform);
-		nodeVisual.transform.position = new Vector3 (Camera.main.pixelWidth / 2, Camera.main.pixelHeight - 50, 0);
+		nodeVisual.transform.position = new Vector3 (Camera.main.pixelWidth / 3, Camera.main.pixelHeight - 100, 0);
 		nodeVisual.GetComponentInChildren<Text> ().text = root.GetText ();
 
 		DisplayChildren (root, nodeVisual.transform.position, 2);

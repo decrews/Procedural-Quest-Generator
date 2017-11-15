@@ -4,12 +4,13 @@ using UnityEngine;
 
 public class Listen : Action {
 	
-	public Listen() {
+	public Listen(string listenForWhat) {
+		this.actionText = "Listen for: " + listenForWhat;
 		this.subActions = new List<Action>();
 		Initialize ();
 	}
 
-	public override void Initialize() {
+	public void Initialize() {
 		
 	}
 }
