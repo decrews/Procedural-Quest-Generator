@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class Loot : Action {
 	
-	public Loot(string item) {
-		actionText = "Loot " + item;
+	public Loot(ItemData item) {
+		actionText = "Loot " + item.name;
 		this.subActions = new List<Action>();
 		Initialize ();
 	}

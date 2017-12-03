@@ -4,17 +4,18 @@ using UnityEngine;
 
 public class Use : Action {
 	
-	public Use(string item) {
-		actionText = "Use " + item;
+	public Use(ItemData item) {
+		actionText = "Use " + item.name;
 		this.subActions = new List<Action>();
 		Initialize (item);
 	}
 
-	public void Initialize(string item) {
+	public void Initialize(ItemData item) {
 		QuestGenerator qg = QuestGenerator.Instance ();
 
 		List<List<string>> patterns = new List<List<string>> ();
-		patterns.Add(new List<string> { "kill", "loot", "goto" });
+		patterns.Add(new List<string> {});
+		patterns.Add(new List<string> { "kill", "loot" });
 
 
 		foreach (string act in patterns [Random.Range (0, patterns.Count)]) {
@@ -23,7 +24,7 @@ public class Use : Action {
 			} else if (act == "loot") {
 				subActions.Add (new Loot (item));
 			} else if (act == "kill") {
-				subActions.Add (new Kill (qg.GetEnemy()));
+				subActions.Add (new Kill (qg.GetEnemy(item)));
 			}
 		}
 	}

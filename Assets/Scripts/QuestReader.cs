@@ -9,28 +9,33 @@ public class QuestReader : MonoBehaviour {
 	[SerializeField]
 	private GameObject text;
 	private int stepCount = 0;
+	private string indent = "      ";
+
 
 	public void ReadQuest(Quest quest) {
+		text.GetComponent<Text> ().text += "Motivation: " + quest.motivation;
+		text.GetComponent<Text> ().text += "\n\n Description: " + quest.description + "\n";
 
-		Debug.Log ("Quest Name: " + quest.name);
-		Debug.Log ("Quest Description: " + quest.description);
-
-		ReadSubactions (quest.root);
-
+		ReadSubactions (quest.root, 0);
 	}
 
+	public void ReadSubactions(Action action, int depth) {
+		// Start a new line for the quest step
+		text.GetComponent<Text> ().text += "\n";
 
-	public void ReadSubactions(Action action) {
+		// Indent based on the depth of the tree
+		for (int i = 0; i < depth; i++) {
+			text.GetComponent<Text> ().text += indent;
+		}
+
 		if (action.subActions.Count == 0) {
-			Debug.Log (action.actionText);
-			text.GetComponent<Text> ().text += "\n" + stepCount + ": " + action.actionText;
+			text.GetComponent<Text> ().text += action.actionText;
 			stepCount++;
 		} else {
+			text.GetComponent<Text> ().text += action.actionText;
 			foreach (Action a in action.subActions) {
-				ReadSubactions (a);
+				ReadSubactions (a, depth+1);
 			}
-			Debug.Log (action.actionText);
-			text.GetComponent<Text> ().text += "\n" + stepCount + ": " + action.actionText;
 			stepCount++;
 		}
 	}

@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class Goto : Action {
 	
-	public Goto(string location) {
-		this.actionText = "Go to " + location;
+	public Goto(LocationData location) {
+		this.actionText = "Go to " + location.name;
 		this.subActions = new List<Action>();
 		Initialize ();
 	}

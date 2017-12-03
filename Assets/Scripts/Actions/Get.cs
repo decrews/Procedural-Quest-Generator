@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class Get : Action {
 
-	public Get(string item) {
-		this.actionText = "Acquire " + item;
+	public Get(ItemData item) {
+		this.actionText = "Acquire " + item.name;
 		this.subActions = new List<Action>();
 		Initialize (item);
 	}
 
-	public void Initialize(string item) {
+	public void Initialize(ItemData item) {
 		QuestGenerator qg = QuestGenerator.Instance ();
 
 		List<List<string>> patterns = new List<List<string>> ();
@@ -21,11 +21,11 @@ public class Get : Action {
 
 		foreach (string act in patterns [Random.Range (0, patterns.Count)]) {
 			if (act == "kill") {
-				subActions.Add (new Kill (qg.GetEnemy()));
+				subActions.Add (new Kill (qg.GetEnemy(item)));
 			} else if (act == "steal") {
-				subActions.Add (new Steal (item, qg.GetEnemy()));
+				subActions.Add (new Steal (item, qg.GetEnemy(item)));
 			} else if (act == "learn") {
-				subActions.Add (new Learn (item));
+				subActions.Add (new Learn (qg.GetFriendlyNPC()));
 			} else if (act == "goto") {
 				subActions.Add (new Goto (qg.GetLocation()));
 			} else if (act == "gather") {

@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class Gather : Action {
 
-	public Gather(string item) {
-		this.actionText = "Gather " + item;
+	public Gather(ItemData item) {
+		this.actionText = "Gather " + item.name;
 		this.subActions = new List<Action>();
 		Initialize ();
 	}

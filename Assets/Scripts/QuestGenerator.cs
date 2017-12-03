@@ -9,13 +9,14 @@ using UnityEngine;
 
 public class QuestGenerator {
 
-	List<List<string>> questTemplates;
+	// Reference to the game object which contains the game state
+	Game gm;
 
-	// lists of available npcs, enemies, and locations to generate quests with
-	List<string> items;
-	List<string> locations;
-	List<string> npcs;
-	List<string> enemies;
+	// Local copies of all data
+	List<LocationData> locData;
+	List<NPCData> npcData;
+	List<EnemyData> enemyData;
+	List<ItemData> itemData;
 
 	private static QuestGenerator instance;
 	public static QuestGenerator Instance() {
@@ -26,105 +27,218 @@ public class QuestGenerator {
 		return instance;
 	}
 
-	private QuestGenerator() {
-		// Templates for each roots of the quest chain.
-		List<string> quest1 = new List<string> { "get", "goto", "use" };
-		List<string> quest2 = new List<string> { "steal", "report" };
-		List<string> quest3 = new List<string> { "learn", "steal", "report" };
 
-		// Put templates into a list that can be randomly selected from
-		questTemplates = new List<List<string>> { quest1, quest2, quest3 };
+	private QuestGenerator() {
+		gm = GameObject.Find ("Canvas").GetComponent<Game>();
 	}
 
 
-	public Quest GetQuest() {
-
-		// Populate the lists of available items, locations, and npcs
-		Populate ();
-
-		List<Action> rootQuests = new List<Action> ();
-		List<string> selectedTemplate = questTemplates [Random.Range (0, questTemplates.Count)];
-
-		foreach (string act in selectedTemplate) {
-			if (act == "get") {
-				rootQuests.Add (new Get (GetItem()));
-			} else if (act == "goto") {
-				rootQuests.Add (new Goto (GetLocation()));
-			} else if (act == "use") {
-				rootQuests.Add (new Use (GetItem()));
-			} else if (act == "steal") {
-				rootQuests.Add (new Steal (GetItem(), GetEnemy()));
-			} else if (act == "learn") {
-				rootQuests.Add (new Learn (GetItem()));
-			} else if (act == "report") {
-				rootQuests.Add (new Report (GetFriendlyNPC()));
-			}
-		}
-			
-		Subquest root = new Subquest(rootQuests);
+	public Quest GetQuest(string motive, int minimumComplexity) {
+		int failCatch = 0;
+		Subquest root = GetActions (motive);
 		Quest quest = new Quest (root);
+
+		while (quest.GetDepth () < minimumComplexity || quest.GetDepth() > 20) {
+			if (failCatch > 100) {
+				Debug.Log ("Can't find path, breaking out!");
+				break;
+			}
+
+
+			quest = new Quest(GetActions (motive));
+			failCatch++;
+		}
+
+		quest.motivation = motive;
+		quest.description = root.actionText;
+		// Will add quest metadata here, such as text, title, etc...
 
 		return quest;
 	}
 
 
-	// Will populate the quest generator with available locations, items, and npcs for quests
-	// Right now it just fills the lists with random things from World of Warcraft
-	private void Populate() {
-		items = new List<string> { "Warglaive of Azzinoth", "Sulfuras", "Thunderfury", "Shadowmourne", "Silk Cloth",
-			"Iron Ore" };
-		ShuffleStrings (items);
+	// Gets appropriate actions for the subquest based on motive
+	public Subquest GetActions(string motive) {
 
-		enemies = new List<string> { "Spider", "Bear", "Basilisk", "Kobold", "Lich", "Fel Orc", "Naga",
-			"Abomination", "Wolf" };
-		ShuffleStrings (enemies);
+		// Load the lists of available npcs, enemies, locations, and items.
+		locData = new List<LocationData> (gm.locations);
+		npcData = new List<NPCData>(gm.npcs);
+		enemyData = new List<EnemyData>(gm.enemies);
+		itemData = new List<ItemData>(gm.items);
 
-		npcs = new List<string> { "Thrall", "Vol'jin", "Sylvanas", "Cairne", "Lor'themar", "Saurfang", "Durotan", "Drek'Thar" };
-		ShuffleStrings (npcs);
+		SeedData seed;
+		if (motive == "knowledge") {
+			seed = gm.knowledgeSeeds [Random.Range (0, gm.knowledgeSeeds.Length)];
+		} else if (motive == "comfort") {
+			seed = gm.comfortSeeds [Random.Range (0, gm.comfortSeeds.Length)];
+		} else if (motive == "justice") {
+			seed = gm.justiceSeeds [Random.Range (0, gm.justiceSeeds.Length)];
+		} else {
+			throw new System.NotImplementedException ();
+		}
 
-		locations = new List<string> { "Undercity", "Tarren Mill", "Grom'gol", "Razor Hill", "Bloodvenom Post", "Stormwind",
-			"Ironforge", "Darnasus", "Orgrimmar" };
-		ShuffleStrings (locations);
+		List<Action> rootActions = assignActions (new List<string>(seed.actions));
+
+		Subquest root = new Subquest(rootActions);
+
+		// Set the subqest action text
+		root.actionText = seed.description;
+
+		return root;
 	}
 
 
-	 // These functions will be how the quest generator accesses the game state to determine how to populate
-	 // the items, locations, and npcs of the quests.
+	// Turns a string action plan into a list of Actions with appropriate data
+	public List<Action> assignActions(List<string> actions) {
+		// Reverse the list so that the plan can be made regressively
+		List<string> reversedActions = new List<string>(actions);
+		reversedActions.Reverse ();
 
-	public string GetLocation() {
-		string loc = locations [0];
-		locations.RemoveAt (0);
-		return loc;
+		NPCData reportingTo = null;
+		EnemyData enemyAttacking = null;
+		ItemData itemAcquired = null;
+		ItemData itemUsed = null;
+
+		List<Action> rootActions = new List<Action> ();
+
+		foreach (string act in reversedActions) {
+			if (act == "get") {
+				if (itemUsed != null) {
+					rootActions.Add (new Get (itemUsed));
+					itemUsed = null;
+				} else {
+					rootActions.Add (new Get (GetItem()));
+				}
+			} 
+
+			else if (act == "goto") {
+				if (reportingTo != null) {
+					// An npc was selected to report to, go to them
+					rootActions.Add (new Goto (reportingTo.location));
+					reportingTo = null;
+
+				} else if (enemyAttacking != null) {
+					// An enemy was selected to attack get it's location
+					rootActions.Add(new Goto(enemyAttacking.location));
+					enemyAttacking = null;
+				} else {
+					// Default to a random location
+					rootActions.Add (new Goto (GetLocation ()));	
+				}
+			} 
+
+			else if (act == "use") {
+				itemUsed = GetItem ();
+				rootActions.Add (new Use (itemUsed));
+			} 
+
+			else if (act == "steal") {
+				rootActions.Add (new Steal (GetItem(), GetEnemy()));
+			} 
+
+			else if (act == "learn") {
+				rootActions.Add (new Learn (GetFriendlyNPC()));
+			} 
+
+			else if (act == "report") {
+				reportingTo = GetFriendlyNPC ();
+				rootActions.Add (new Report (reportingTo));
+			} 
+
+			else if (act == "kill") {
+				enemyAttacking = GetEnemy ();
+				rootActions.Add (new Kill (enemyAttacking));
+			} 
+
+			else if (act == "listen") {
+				rootActions.Add (new Listen (GetFriendlyNPC()));
+			}
+		}
+
+		// Reverse the rootActions list which was built backwards
+		rootActions.Reverse();
+
+		return rootActions;
 	}
 
-	public string GetFriendlyNPC() {
-		string npc = npcs [0];
-		npcs.RemoveAt (0);
+	/*
+
+	Methods for getting NPCs
+
+	*/
+
+	// Get a random location
+	public LocationData GetLocation() {
+		int index = Random.Range (0, locData.Count-1);
+		LocationData location = locData [index];
+		locData.RemoveAt (index);
+		return location;
+	}
+
+
+	/*
+
+	Methods for getting NPCs
+
+	*/
+
+	// Get a random NPC;
+	public NPCData GetFriendlyNPC() {
+		int index = Random.Range (0, npcData.Count-1);
+		NPCData npc = npcData [index];
+		npcData.RemoveAt (index);
 		return npc;
 	}
 
-	public string GetEnemy() {
-		string enemy = enemies [0];
-		enemies.RemoveAt (0);
+	/*
+
+	Methods for getting Enemies
+
+	*/
+
+	// Get a random enemy
+	public EnemyData GetEnemy() {
+		int index = Random.Range (0, enemyData.Count-1);
+		EnemyData enemy = enemyData [index];
+		enemyData.RemoveAt (index);
 		return enemy;
 	}
 
-	public string GetItem() {
-		string item = items [0];
-		items.RemoveAt (0);
-		return item;
+
+	// Get an enemy with a specific item
+	public EnemyData GetEnemy(ItemData item) {
+		EnemyData enemy = null;
+
+		// Search all enemies for one that has this loot
+		foreach (EnemyData e in enemyData) {
+			foreach (ItemData i in e.loot) {
+				if (i.name == item.name) {
+					enemy = e;
+				}
+			}
+		}
+
+		// If an enemy is found that contains that on it's loot table, return that
+		// otherwise get a random enemy as a fallback
+		if (enemy != null) {
+			return enemy;
+		} else {
+			return GetEnemy (); 
+		}
 	}
 
 
-	//https://stackoverflow.com/questions/273313/randomize-a-listt  
-	public static void ShuffleStrings(List<string> list) {  
-		int n = list.Count;  
-		while (n > 1) {  
-			n--;  
-			int k = Random.Range(0, (n + 1));  
-			string value = list[k];  
-			list[k] = list[n];  
-			list[n] = value;  
-		}  
+	/*
+
+	Methods for getting Items
+
+	*/
+
+	// Get a random item
+	public ItemData GetItem() {
+		int index = Random.Range (0, itemData.Count-1);
+		ItemData item = itemData [index];
+		itemData.RemoveAt (index);
+		return item;
 	}
 }
