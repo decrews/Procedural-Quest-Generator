@@ -114,12 +114,12 @@ public class QuestGenerator {
 			else if (act == "goto") {
 				if (reportingTo != null) {
 					// An npc was selected to report to, go to them
-					rootActions.Add (new Goto (reportingTo.location));
+					rootActions.Add (new Goto (reportingTo));
 					reportingTo = null;
 
 				} else if (enemyAttacking != null) {
 					// An enemy was selected to attack get it's location
-					rootActions.Add(new Goto(enemyAttacking.location));
+					rootActions.Add(new Goto(enemyAttacking));
 					enemyAttacking = null;
 				} else {
 					// Default to a random location

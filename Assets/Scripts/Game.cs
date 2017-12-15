@@ -22,13 +22,13 @@ public class Game : MonoBehaviour {
 
 		if (questType == 0) {
 			// Generate a knowledge quest
-			example = qg.GetQuest ("knowledge", 7);
+			example = qg.GetQuest ("knowledge", 8);
 		} else if (questType == 1) {
 			// Generate a comfort quest
-			example = qg.GetQuest("comfort", 6);
+			example = qg.GetQuest("comfort", 8);
 		} else {
 			// Generate a justice quest
-			example = qg.GetQuest("justice", 6);
+			example = qg.GetQuest("justice", 8);
 		}
 
 		// Render the quest nodes to the UI

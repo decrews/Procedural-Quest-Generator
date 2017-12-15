@@ -16,11 +16,18 @@ public class Learn : Action {
 		Initialize (about);
 	}
 
+	public Learn(LocationData about) {
+		this.actionText = "Learn about the location: " + about.name;
+		this.subActions = new List<Action>();
+		Initialize (about);
+	}
+
 	public void Initialize(NPCData about) {
 		QuestGenerator qg = QuestGenerator.Instance ();
 
 		List<List<string>> patterns = new List<List<string>> ();
 		patterns.Add(new List<string> { "kill", "loot", "use" });
+		patterns.Add(new List<string> { "get", "use" });
 		patterns.Add(new List<string> { "listen" });
 
 		List<string> pattern = patterns [Random.Range (0, patterns.Count)];
@@ -33,6 +40,20 @@ public class Learn : Action {
 
 		List<List<string>> patterns = new List<List<string>> ();
 		patterns.Add(new List<string> { "kill", "loot", "use" });
+		patterns.Add(new List<string> { "get", "use" });
+		patterns.Add(new List<string> { "listen" });
+
+		List<string> pattern = patterns [Random.Range (0, patterns.Count)];
+
+		this.subActions = qg.assignActions (pattern);
+	}
+
+	public void Initialize(LocationData about) {
+		QuestGenerator qg = QuestGenerator.Instance ();
+
+		List<List<string>> patterns = new List<List<string>> ();
+		patterns.Add(new List<string> { "kill", "loot", "use" });
+		patterns.Add(new List<string> { "get", "use" });
 		patterns.Add(new List<string> { "listen" });
 
 		List<string> pattern = patterns [Random.Range (0, patterns.Count)];

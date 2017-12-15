@@ -25,7 +25,7 @@ public class Get : Action {
 			} else if (act == "steal") {
 				subActions.Add (new Steal (item, qg.GetEnemy(item)));
 			} else if (act == "learn") {
-				subActions.Add (new Learn (qg.GetFriendlyNPC()));
+				subActions.Add (new Learn (qg.GetEnemy(item)));
 			} else if (act == "goto") {
 				subActions.Add (new Goto (qg.GetLocation()));
 			} else if (act == "gather") {
